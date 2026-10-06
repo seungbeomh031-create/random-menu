@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오늘 뭐 먹지? | 랜덤 메뉴 추천</title>
+  <meta name="description" content="매일 반복되는 고민, 오늘 점심과 저녁 메뉴를 랜덤으로 시원하게 추천해드립니다!">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="style.css">
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+  <!-- 배경 데코 요소 -->
+  <div class="bg-decorations" aria-hidden="true">
+    <span class="float-emoji e1">🍕</span>
+    <span class="float-emoji e2">🍣</span>
+    <span class="float-emoji e3">🍜</span>
+    <span class="float-emoji e4">🍔</span>
+    <span class="float-emoji e5">🥘</span>
+    <span class="float-emoji e6">🍗</span>
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+  </div>
+
+  <main class="container">
+    <!-- 헤더 영역 -->
+    <header class="header">
+      <div class="badge-tag">🎲 결정 장애 완치 프로젝트</div>
+      <h1 class="main-title">오늘 뭐 먹지?</h1>
+      <p class="subtitle">고민은 그만! 버튼 하나로 오늘 완벽한 한 끼를 골라드립니다.</p>
+    </header>
+
+    <!-- 카테고리 필터 -->
+    <nav class="category-tabs" aria-label="메뉴 카테고리 필터">
+      <button class="cat-btn active" data-category="all" id="cat-all">
+        <span class="cat-icon">🍽️</span> 전체보기 <span class="cat-count">60</span>
+      </button>
+      <button class="cat-btn" data-category="korean" id="cat-korean">
+        <span class="cat-icon">🍚</span> 한식 <span class="cat-count">15</span>
+      </button>
+      <button class="cat-btn" data-category="chinese" id="cat-chinese">
+        <span class="cat-icon">🥟</span> 중식 <span class="cat-count">15</span>
+      </button>
+      <button class="cat-btn" data-category="japanese" id="cat-japanese">
+        <span class="cat-icon">🍣</span> 일식 <span class="cat-count">15</span>
+      </button>
+      <button class="cat-btn" data-category="western" id="cat-western">
+        <span class="cat-icon">🍕</span> 양식·배달 <span class="cat-count">15</span>
+      </button>
+    </nav>
+
+    <!-- 상단 유틸리티 바 (메뉴 목록 보기 & 사운드 토글) -->
+    <div class="top-controls-bar">
+      <button id="openListModalBtn" class="utility-btn list-btn" aria-label="메뉴 전체 목록 보기">
+        <span class="btn-icon">📋</span> 전체 메뉴 목록 보기 <span class="list-count-badge">60</span>
+      </button>
+      <button id="soundToggleBtn" class="utility-btn sound-btn" aria-label="효과음 켜기/끄기" title="효과음 토글">
+        <span id="soundIcon">🔊</span> 효과음 <span>ON</span>
+      </button>
+    </div>
+
+    <!-- 메인 추천 룰렛 & 결과 카드 -->
+    <section class="roulette-card" id="rouletteCard">
+      <!-- 룰렛 대기/진행 상태 -->
+      <div class="roulette-display" id="rouletteDisplay">
+        <div class="food-emoji-box" id="foodEmojiBox">
+          <span class="display-emoji" id="displayEmoji">❓</span>
+        </div>
+        <div class="food-info-box">
+          <span class="food-category-label" id="categoryLabel">카테고리</span>
+          <h2 class="food-name" id="foodName">무엇이 나올까요?</h2>
+          <p class="food-tagline" id="foodTagline">아래 버튼을 눌러 랜덤 메뉴를 뽑아보세요!</p>
+        </div>
+      </div>
+
+      <!-- 결과 확정 시 추가 액션 (지도 검색, 다시 뽑기) -->
+      <div class="result-actions" id="resultActions" style="display: none;">
+        <a href="#" target="_blank" rel="noopener noreferrer" class="map-link-btn" id="mapSearchBtn">
+          📍 근처 맛집 검색하기
+        </a>
+      </div>
+
+      <!-- 추천 트리거 버튼 -->
+      <div class="action-box">
+        <button id="recommendBtn" class="cta-button">
+          <span class="btn-sparkle">✨</span>
+          <span class="btn-text">메뉴 추천하기</span>
+          <span class="btn-arrow">➔</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 히스토리 영역 -->
+    <section class="history-section" id="historySection">
+      <h3 class="history-title">🕒 최근 추천받은 메뉴</h3>
+      <div class="history-list" id="historyList">
+        <span class="history-empty">아직 뽑은 메뉴가 없어요!</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="footer">
+    <p>맛있는 식사 하시고 행복한 하루 보내세요! 😋</p>
+  </footer>
+
+  <!-- 전체 메뉴 리스트 모달 팝업 -->
+  <div class="modal-overlay" id="menuModal" aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">총 60가지 메뉴</span>
+          <h2 id="modalTitle" class="modal-title">📋 추천 음식 전체 리스트</h2>
+        </div>
+        <button id="closeModalBtn" class="close-modal-btn" aria-label="메뉴판 닫기">&times;</button>
+      </div>
+
+      <!-- 실시간 검색창 -->
+      <div class="modal-search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="menuSearchInput" class="menu-search-input" placeholder="메뉴 이름이나 키워드를 검색해보세요 (예: 치킨, 초밥, 찌개)..." />
+        <button id="clearSearchBtn" class="clear-search-btn" style="display: none;" aria-label="검색어 지우기">&times;</button>
+      </div>
+
+      <!-- 메뉴 목록 본문 (카테고리별 그리드) -->
+      <div class="modal-body" id="modalMenuBody">
+        <!-- JS를 통해 카테고리별 섹션이 채워집니다 -->
+      </div>
+
+      <div class="modal-footer">
+        <span class="modal-tip">💡 카드를 클릭하면 오늘 메뉴로 바로 선택할 수 있어요!</span>
+        <button id="modalConfirmCloseBtn" class="modal-close-action-btn">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
